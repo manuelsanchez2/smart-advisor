@@ -14,6 +14,9 @@ export function useData(remoteStorage) {
   const [items, setItems] = useState([])
   const [itemsList, setItemsList] = useState([])
   const [settings, setSettings] = useState({ theme: 'light', language: 'en' })
+  const [todos, setTodos] = useState([])
+  const [stockItems, setStockItems] = useState([])
+  const [aiConfig, setAiConfig] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isConnected, setIsConnected] = useState(false)
 
@@ -45,7 +48,7 @@ export function useData(remoteStorage) {
 
   // Load all data when connected
   const loadAllData = useCallback(async () => {
-    if (!remoteStorage?.mymodule || !isConnected) {
+    if (!remoteStorage || !isConnected) {
       setIsLoading(false)
       return
     }
@@ -54,12 +57,34 @@ export function useData(remoteStorage) {
 
     try {
       // Load items list (metadata)
-      const list = await remoteStorage.mymodule.getItemsList()
-      setItemsList(list)
+      if (remoteStorage.mymodule?.getItemsList) {
+        const list = await remoteStorage.mymodule.getItemsList()
+        setItemsList(list)
+      }
 
       // Load settings
-      const loadedSettings = await remoteStorage.mymodule.loadSettings()
-      setSettings(loadedSettings)
+      if (remoteStorage.mymodule?.loadSettings) {
+        const loadedSettings = await remoteStorage.mymodule.loadSettings()
+        setSettings(loadedSettings)
+      }
+
+      // Load todos from todonna scope
+      if (remoteStorage.todonna?.getAll) {
+        const loadedTodos = await remoteStorage.todonna.getAll({ maxAge: 5 * 60 * 1000 })
+        setTodos(Array.isArray(loadedTodos) ? loadedTodos : [])
+      }
+
+      // Load stock items from einkauf scope
+      if (remoteStorage.einkauf?.getItemsList) {
+        const stockList = await remoteStorage.einkauf.getItemsList()
+        setStockItems(Array.isArray(stockList) ? stockList : [])
+      }
+
+      // Load AI Wallet configuration
+      if (remoteStorage["ai-wallet"]?.getConfig) {
+        const config = await remoteStorage["ai-wallet"].getConfig()
+        setAiConfig(config || null)
+      }
     } catch (error) {
       console.error("Error loading data:", error)
     } finally {
@@ -69,7 +94,7 @@ export function useData(remoteStorage) {
 
   // Initial load
   useEffect(() => {
-    if (!remoteStorage?.mymodule || !isConnected) {
+    if (!remoteStorage || !isConnected) {
       setIsLoading(false)
       return
     }
@@ -92,6 +117,9 @@ export function useData(remoteStorage) {
     // RemoteStorage uses onChange with a path
     try {
       remoteStorage.onChange?.('/mymodule/', changeHandler)
+      remoteStorage.onChange?.('/todonna/', changeHandler)
+      remoteStorage.onChange?.('/einkauf/', changeHandler)
+      remoteStorage.onChange?.('/ai-wallet/', changeHandler)
     } catch (error) {
       console.warn("Could not attach change listener:", error)
     }
@@ -209,10 +237,48 @@ export function useData(remoteStorage) {
     }
   }, [remoteStorage, isConnected, loadAllData])
 
+  /**
+   * Save AI wallet configuration
+   * @param {Object} config - AI wallet configuration object
+   */
+  const saveAiConfig = useCallback(async (config) => {
+    if (!remoteStorage?.["ai-wallet"] || !isConnected) {
+      throw new Error("RemoteStorage is not connected")
+    }
+
+    isSavingRef.current = true
+    try {
+      await remoteStorage["ai-wallet"].setConfig(config)
+      setAiConfig(config)
+    } catch (error) {
+      console.error("Error saving AI wallet config:", error)
+      throw error
+    } finally {
+      setTimeout(() => {
+        isSavingRef.current = false
+      }, 100)
+    }
+  }, [remoteStorage, isConnected])
+
+  const connect = useCallback((userAddress) => {
+    if (!remoteStorage?.connect) {
+      throw new Error("RemoteStorage is not ready yet")
+    }
+    remoteStorage.connect(userAddress)
+  }, [remoteStorage])
+
+  const disconnect = useCallback(() => {
+    if (!remoteStorage?.disconnect) return
+    remoteStorage.disconnect()
+  }, [remoteStorage])
+
   return {
     // State
     isLoading,
     isConnected,
+    aiConfig,
+    todos,
+    stockItems,
 
     // Items
     items,
@@ -225,8 +291,14 @@ export function useData(remoteStorage) {
     settings,
     saveSettings,
 
+    // AI config
+    saveAiConfig,
+
+    // Connection controls
+    connect,
+    disconnect,
+
     // Utility
     reload: loadAllData
   }
 }
-

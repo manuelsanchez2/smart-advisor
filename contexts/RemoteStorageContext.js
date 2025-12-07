@@ -4,6 +4,9 @@ import { createContext, useContext, useMemo } from "react"
 import { useRemoteStorage } from "../hooks/use-remote-storage"
 import { useData } from "../hooks/use-data"
 import { MyModule } from "../lib/remotestorage-module"
+import { EinkaufModule } from "../lib/remotestorage-einkauf-module"
+import { TodonnaModule } from "../lib/remotestorage-todonna-module"
+import { AI as AiWalletModule } from "remotestorage-module-ai-wallet"
 import RemoteStorageWidget from "../components/RemoteStorageWidget"
 
 const RemoteStorageContext = createContext(null)
@@ -15,9 +18,12 @@ const RemoteStorageContext = createContext(null)
 export function RemoteStorageProvider({ children }) {
   // Initialize RemoteStorage with your module
   const remoteStorage = useRemoteStorage({
-    modules: [MyModule],
+    modules: [MyModule, EinkaufModule, TodonnaModule, AiWalletModule],
     accessClaims: {
-      'mymodule': 'rw'  // Read-write access to your module
+      'mymodule': 'rw',  // Read-write access to your module
+      'einkauf': 'rw',
+      'todonna': 'rw',
+      'ai-wallet': 'rw'
     }
   })
 
@@ -57,4 +63,3 @@ export function useRemoteStorageContext() {
   }
   return context
 }
-

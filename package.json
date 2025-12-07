@@ -9,11 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.79",
+    "ai": "^5.0.108",
     "clsx": "^2.1.1",
     "m5x5-remotestorage-widget": "^1.8.0",
     "next": "16.0.7",
     "react": "19.2.1",
     "react-dom": "19.2.1",
+    "remotestorage-module-ai-wallet": "^0.0.1",
     "remotestoragejs": "^2.0.0-beta.8",
     "tailwind-merge": "^3.4.0"
   },
