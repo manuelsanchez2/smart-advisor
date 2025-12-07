@@ -4,8 +4,17 @@ import { useState } from "react"
 import { useRemoteStorageContext } from "../contexts/RemoteStorageContext"
 
 export default function Home() {
-  const { isConnected, isLoading, itemsList, saveItem, loadItem, deleteItem, settings, saveSettings } = useRemoteStorageContext()
-  
+  const {
+    isConnected,
+    isLoading,
+    itemsList,
+    saveItem,
+    loadItem,
+    deleteItem,
+    settings,
+    saveSettings,
+  } = useRemoteStorageContext()
+
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [selectedItem, setSelectedItem] = useState(null)
@@ -14,7 +23,7 @@ export default function Home() {
   // Handle save new item
   const handleSave = async (e) => {
     e.preventDefault()
-    
+
     if (!title.trim()) {
       setMessage("Please enter a title")
       return
@@ -25,14 +34,14 @@ export default function Home() {
         id: Date.now().toString(),
         title: title,
         description: description,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       }
-      
+
       await saveItem(newItem)
       setMessage("Item saved successfully!")
       setTitle("")
       setDescription("")
-      
+
       setTimeout(() => setMessage(""), 3000)
     } catch (error) {
       setMessage("Error saving item: " + error.message)
@@ -52,12 +61,12 @@ export default function Home() {
   // Handle delete item
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this item?")) return
-    
+
     try {
       await deleteItem(id)
       setMessage("Item deleted successfully!")
       setSelectedItem(null)
-      
+
       setTimeout(() => setMessage(""), 3000)
     } catch (error) {
       setMessage("Error deleting item: " + error.message)
@@ -67,11 +76,11 @@ export default function Home() {
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
-          Next.js RemoteStorage Template
+        <h1 className="text-4xl text-center font-bold text-gray-900 mb-2">
+          Smart Advisor
         </h1>
-        <p className="text-gray-600 mb-8">
-          A minimal example showing RemoteStorage integration
+        <p className="text-gray-600 mb-8 text-center">
+          Let me help you make smarter decisions
         </p>
 
         {/* Connection Status */}
@@ -80,7 +89,9 @@ export default function Home() {
           {isLoading ? (
             <p className="text-gray-600">Loading...</p>
           ) : isConnected ? (
-            <p className="text-green-600 font-medium">✓ Connected to RemoteStorage</p>
+            <p className="text-green-600 font-medium">
+              ✓ Connected to RemoteStorage
+            </p>
           ) : (
             <div>
               <p className="text-orange-600 font-medium">⚠ Not connected</p>
@@ -106,7 +117,10 @@ export default function Home() {
               <h2 className="text-xl font-semibold mb-4">Create New Item</h2>
               <form onSubmit={handleSave} className="space-y-4">
                 <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="title"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Title
                   </label>
                   <input
@@ -119,7 +133,10 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Description
                   </label>
                   <textarea
@@ -153,7 +170,9 @@ export default function Home() {
                       className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50"
                     >
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{item.title}</h3>
+                        <h3 className="font-medium text-gray-900">
+                          {item.title}
+                        </h3>
                         <p className="text-sm text-gray-500">
                           Updated: {new Date(item.updated_at).toLocaleString()}
                         </p>
@@ -189,8 +208,12 @@ export default function Home() {
                   </div>
                   {selectedItem.description && (
                     <div>
-                      <span className="font-medium text-gray-700">Description:</span>
-                      <p className="text-gray-900">{selectedItem.description}</p>
+                      <span className="font-medium text-gray-700">
+                        Description:
+                      </span>
+                      <p className="text-gray-900">
+                        {selectedItem.description}
+                      </p>
                     </div>
                   )}
                   <div>
@@ -201,7 +224,9 @@ export default function Home() {
                   </div>
                   {selectedItem.updated_at && (
                     <div>
-                      <span className="font-medium text-gray-700">Updated:</span>
+                      <span className="font-medium text-gray-700">
+                        Updated:
+                      </span>
                       <p className="text-gray-600">
                         {new Date(selectedItem.updated_at).toLocaleString()}
                       </p>
@@ -243,14 +268,18 @@ export default function Home() {
             <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
             <ol className="list-decimal list-inside space-y-2 text-gray-700">
               <li>Click the RemoteStorage widget in the bottom right corner</li>
-              <li>Connect to a RemoteStorage server (e.g., https://remotestorage-widget.m5x5.com/)</li>
+              <li>
+                Connect to a RemoteStorage server (e.g.,
+                https://remotestorage-widget.m5x5.com/)
+              </li>
               <li>Grant access to your data</li>
               <li>Start creating and managing items!</li>
             </ol>
             <div className="mt-4 p-4 bg-blue-50 rounded-md">
               <p className="text-sm text-blue-800">
-                <strong>Tip:</strong> Your data is stored on your own RemoteStorage server, 
-                giving you full control and ownership of your information.
+                <strong>Tip:</strong> Your data is stored on your own
+                RemoteStorage server, giving you full control and ownership of
+                your information.
               </p>
             </div>
           </div>
@@ -259,4 +288,3 @@ export default function Home() {
     </div>
   )
 }
-
